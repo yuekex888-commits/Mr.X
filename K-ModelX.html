@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NanoBanana Pro - 批量生图控制台 (IDB持久化版)</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 React 和 ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- 引入 Babel 用于解析 JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        /* 自定义滚动条 */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
+        body { background-color: #0f172a; color: #e2e8f0; }
+        /* 复选框自定义样式 */
+        .custom-checkbox { accent-color: #eab308; width: 16px; height: 16px; cursor: pointer; }
+        /* 任务卡片悬停效果 */
+        .task-card:hover .task-actions { opacity: 1; }
+        .task-actions { transition: opacity 0.2s ease-in-out; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useRef, useEffect, useCallback, useMemo } = React;
+
+        // --- 图标组件 (SVG) ---
+        const Icon = ({ path, className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                {path}
+            </svg>
+        );
+
+        const Icons = {
+            AlertCircle: (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>} />,
+            CheckCircle: (p) => <Icon {...p} path={<><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>} />,
+            CloudUpload: (p) => <Icon {...p} path={<><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></>} />,
+            Copy: (p) => <Icon {...p} path={<><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></>} />,
+            Cpu: (p) => <Icon {...p} path={<><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></>} />,
+            Download: (p) => <Icon {...p} path={<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></>} />,
+            Edit: (p) => <Icon {...p} path={<><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></>} />,
+            Eye: (p) => <Icon {...p} path={<><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></>} />,
+            Folder: (p) => <Icon {...p} path={<><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></>} />,
+            Globe: (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></>} />,
+            ImageIcon: (p) => <Icon {...p} path={<><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></>} />,
+            Key: (p) => <Icon {...p} path={<><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-1.777-1.777L13.17 12l.313.313 3.536 3.536 1.414 1.414.707.707 2.121-2.121"/></>} />,
+            Layers: (p) => <Icon {...p} path={<><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></>} />,
+            Lock: (p) => <Icon {...p} path={<><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>} />,
+            Maximize: (p) => <Icon {...p} path={<><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></>} />,
+            Play: (p) => <Icon {...p} path={<><polygon points="5 3 19 12 5 21 5 3"/></>} />,
+            Plus: (p) => <Icon {...p} path={<><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></>} />,
+            Power: (p) => <Icon {...p} path={<><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></>} />,
+            RefreshCw: (p) => <Icon {...p} path={<><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></>} />,
+            RotateCcw: (p) => <Icon {...p} path={<><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></>} />,
+            Save: (p) => <Icon {...p} path={<><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></>} />,
+            Settings: (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></>} />,
+            StopCircle: (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="10"/><rect x="9" y="9" width="6" height="6"/></>} />,
+            Trash2: (p) => <Icon {...p} path={<><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></>} />,
+            Upload: (p) => <Icon {...p} path={<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></>} />,
+            X: (p) => <Icon {...p} path={<><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>} />,
+            Zap: (p) => <Icon {...p} path={<><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></>} />,
+            Box: (p) => <Icon {...p} path={<><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></>} />,
+        };
+
+        // --- IndexedDB Helper (解决刷新后文件丢失问题) ---
+        const DB_NAME = "NanoBananaDB";
+        const DB_VERSION = 1;
+        const STORE_NAME = "files";
+
+        const dbApi = {
+            init: () => new Promise((resolve, reject) => {
+                const req = indexedDB.open(DB_NAME, DB_VERSION);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME);
+                    }
+                };
+                req.onsuccess = (e) => resolve(e.target.result);
+                req.onerror = (e) => reject(e);
+            }),
+            saveFile: async (id, file) => {
+                const db = await dbApi.init();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction([STORE_NAME], 'readwrite');
+                    const store = tx.objectStore(STORE_NAME);
+                    const req = store.put(file, id);
+                    req.onsuccess = () => resolve();
+                    req.onerror = (e) => reject(e);
+                });
+            },
+            getFile: async (id) => {
+                const db = await dbApi.init();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction([STORE_NAME], 'readonly');
+                    const store = tx.objectStore(STORE_NAME);
+                    const req = store.get(id);
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = (e) => reject(e);
+                });
+            },
+            deleteFile: async (id) => {
+                const db = await dbApi.init();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction([STORE_NAME], 'readwrite');
+                    const store = tx.objectStore(STORE_NAME);
+                    const req = store.delete(id);
+                    req.onsuccess = () => resolve();
+                    req.onerror = (e) => reject(e);
+                });
+            }
+        };
+
+        // --- Config ---
+        const MAX_CONCURRENT_TASKS = 100;
+        const AI_MODEL_NAME = "nano-banana-pro";
+        const API_SUBMIT_URL = "https://grsai.dakka.com.cn/v1/draw/nano-banana";
+        const API_RESULT_URL = "https://grsai.dakka.com.cn/v1/draw/result";
+        const QINIU_UPLOAD_URL = "https://up-z2.qiniup.com";
+        const MAX_RETRIES = 10;
+        const TASK_TIMEOUT_MS = 600 * 1000;
+        const DEFAULT_PROMPT = "保持图片不变，保持动作不变，保持表情不变，让图1的人换成图2的，让图1的脸也换成图2的，让图1的服装也换成图2的。";
+
+        // --- Utils ---
+        const createThumbnail = (file, maxWidth = 128) => new Promise(res => {
+            if (!file) return res(null);
+            const img = new Image(); const url = URL.createObjectURL(file);
+            img.onload = () => {
+                const c = document.createElement('canvas'); const s = maxWidth/img.width;
+                c.width = maxWidth; c.height = img.height*s; c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+                URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg', 0.5));
+            };
+            img.onerror = () => { URL.revokeObjectURL(url); res(null); };
+            img.src = url;
+        });
+
+        const getImageDimensions = (file) => new Promise(res => {
+            const img = new Image(); const u = URL.createObjectURL(file);
+            img.onload = () => { res({w:img.width, h:img.height}); URL.revokeObjectURL(u); };
+            img.onerror = () => { res({w:1024, h:1024}); URL.revokeObjectURL(u); };
+            img.src = u;
+        });
+
+        const calculateBestRatio = (w, h) => {
+            const r = w/h; const ratios = {"1:1":1,"16:9":1.777,"9:16":0.562,"4:3":1.333,"3:4":0.75,"3:2":1.5,"2:3":0.666,"5:4":1.25,"4:5":0.8,"21:9":2.333};
+            let best="1:1", min=Number.MAX_VALUE;
+            for(const[k,v] of Object.entries(ratios)){ const d=Math.abs(v-r); if(d<min){min=d; best=k;} }
+            return best;
+        };
+
+        const generateQiniuToken = async (ak, sk, bk) => {
+            if(!ak||!sk||!bk) throw new Error("缺少七牛云配置");
+            const d = Math.floor(Date.now()/1000)+3600;
+            const p = btoa(JSON.stringify({scope:bk, deadline:d})).replace(/\+/g,'-').replace(/\//g,'_');
+            const k = await window.crypto.subtle.importKey('raw', new TextEncoder().encode(sk), {name:'HMAC',hash:'SHA-1'}, false, ['sign']);
+            const s = await window.crypto.subtle.sign('HMAC', k, new TextEncoder().encode(p));
+            const es = btoa(String.fromCharCode(...new Uint8Array(s))).replace(/\+/g,'-').replace(/\//g,'_');
+            return `${ak}:${es}:${p}`;
+        };
+
+        // --- API ---
+        const uploadQiniu = async (f, cfg, signal) => {
+            let file = f;
+            if(!file.name) file = new File([f], `p_${Math.random().toString(36).slice(2)}.png`, {type:f.type});
+            const key = `${Math.random().toString(36).slice(2)}_${file.name}`;
+            try {
+                const t = await generateQiniuToken(cfg.qiniuAk, cfg.qiniuSk, cfg.qiniuBucket);
+                const fd = new FormData(); fd.append('file', file); fd.append('key', key); fd.append('token', t);
+                const res = await fetch(QINIU_UPLOAD_URL, {method:'POST', body:fd, signal});
+                if(!res.ok) throw new Error(`Upload Failed: ${res.status}`);
+                const d = await res.json();
+                return `http://${cfg.qiniuDomain}/${d.key}`;
+            } catch(e) { if(e.name!=='AbortError') throw e; throw e; }
+        };
+
+        const submitTask = async (sUrl, mUrl, ratio, prompt, cfg, signal) => {
+            const body = { model: AI_MODEL_NAME, prompt, aspectRatio: ratio, imageSize: cfg.outputQuality || "4K", urls: [sUrl, mUrl], webHook: "-1", shutProgress: false };
+            const res = await fetch(API_SUBMIT_URL, {
+                method: 'POST', headers: {'Content-Type':'application/json', 'Authorization':`Bearer ${cfg.nanoApiKey.trim()}`},
+                body: JSON.stringify(body), signal
+            });
+            if(!res.ok) throw new Error(`API HTTP ${res.status}`);
+            const d = await res.json();
+            if(d.code!==0) {
+                if((d.msg||'').toLowerCase().includes('apikey')) throw new Error("FATAL_AUTH");
+                throw new Error(`API Error: ${d.msg}`);
+            }
+            return d.data.id;
+        };
+
+        const pollTask = async (id, cfg, signal) => {
+            const res = await fetch(API_RESULT_URL, {
+                method: 'POST', headers: {'Content-Type':'application/json', 'Authorization':`Bearer ${cfg.nanoApiKey.trim()}`},
+                body: JSON.stringify({id}), signal
+            });
+            const d = await res.json();
+            if(d.code!==0) {
+                if((d.msg||'').toLowerCase().includes('apikey')) throw new Error("FATAL_AUTH");
+                throw new Error(`Poll Error: ${d.code}`);
+            }
+            return d.data;
+        };
+
+        // --- Error Boundary ---
+        class ErrorBoundary extends React.Component {
+            constructor(props){super(props);this.state={e:null};}
+            static getDerivedStateFromError(e){return {e};}
+            render(){
+                if(this.state.e) return <div className="h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-8"><h2 className="text-2xl font-bold mb-2">崩溃了</h2><p className="mb-4 text-slate-400">{this.state.e.message}</p><button onClick={()=>location.reload()} className="px-4 py-2 bg-blue-600 rounded">刷新恢复</button></div>;
+                return this.props.children;
+            }
+        }
+
+        // --- Main App ---
+        function MainApp() {
+            // State
+            const [subjects, setSubjects] = useState([]);
+            const [modelImage, setModelImage] = useState(null);
+            const [outputDir, setOutputDir] = useState("Result");
+            const [tasks, setTasks] = useState(() => { try{ return JSON.parse(localStorage.getItem('nano_history_v2'))||[]; }catch{return[];} });
+            const [selectedIds, setSelectedIds] = useState(new Set());
+            const [logs, setLogs] = useState([]);
+            const [showSettings, setShowSettings] = useState(false);
+            const [useRealApi, setUseRealApi] = useState(true); 
+            const [preview, setPreview] = useState(null);
+            
+            // Config & Prompt
+            const DEFAULT_CFG = {
+                qiniuAk: 'aFSte7dyeDs9kWCDJ5IERTyWdBfMI-tvj_VSWi_Y',
+                qiniuSk: 'Eo7537HjfeJ7nz1oHOp34azBYylqKOzCWZz9wsuC',
+                qiniuBucket: 'ke5295421621',
+                qiniuDomain: 't6e7a787u.hn-bkt.clouddn.com',
+                nanoApiKey: 'sk-28c0d0093c2c4486ac3b394da91f7386',
+                prompt: DEFAULT_PROMPT,
+                localModelPath: '',
+                autoDownload: true,
+                outputQuality: '4K' // New: Default Quality
+            };
+            const [config, setConfig] = useState(() => {
+                const s = localStorage.getItem('nano_banana_config');
+                const p = s ? JSON.parse(s) : {};
+                return { ...DEFAULT_CFG, ...p };
+            });
+
+            // Refs
+            const fileInputRef = useRef(null);
+            const modelInputRef = useRef(null);
+            const tasksRef = useRef(tasks); tasksRef.current = tasks;
+            const configRef = useRef(config); configRef.current = config;
+
+            // Effects
+            useEffect(() => localStorage.setItem('nano_banana_config', JSON.stringify(config)), [config]);
+            useEffect(() => {
+                const save = tasks.map(t=>({
+                    id:t.id, 
+                    fileName: t.file?.name||t.fileName, // Store filename string
+                    thumbnail: t.thumbnail, 
+                    outputName:t.outputName,
+                    status: t.status === 'processing' || t.status === 'uploading' ? 'stopped' : t.status, // Don't persist active states
+                    statusText: t.status === 'processing' || t.status === 'uploading' ? '异常中断' : t.statusText,
+                    progress: t.status === 'done' ? 100 : t.progress,
+                    resultUrl:t.resultUrl, 
+                    timestamp:t.timestamp,
+                    modelUrl: t.modelUrl
+                }));
+                try{ localStorage.setItem('nano_history_v2', JSON.stringify(save.slice(0,50))); }catch{} // Save last 50
+            }, [tasks]);
+
+            // Drag Prevent
+            useEffect(() => {
+                const pd = e => { e.preventDefault(); e.stopPropagation(); };
+                window.addEventListener('dragover', pd); window.addEventListener('drop', pd);
+                return () => { window.removeEventListener('dragover', pd); window.removeEventListener('drop', pd); };
+            }, []);
+
+            // Helpers
+            const log = (m) => setLogs(p => [`[${new Date().toLocaleTimeString()}] ${typeof m==='string'?m:'Error'}`, ...p].slice(0,50));
+            const update = (id, d) => setTasks(p => p.map(t => t.id===id ? {...t, ...d} : t));
+            
+            // --- 下载函数 (防跳转核心逻辑) ---
+            const download = async (url, name) => {
+                try {
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error('Network error');
+                    const blob = await res.blob();
+                    const blobUrl = URL.createObjectURL(blob);
+                    
+                    const a = document.createElement('a'); 
+                    a.href = blobUrl; 
+                    a.download = name;
+                    document.body.appendChild(a); 
+                    a.click(); 
+                    document.body.removeChild(a);
+                    
+                    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+                } catch (e) {
+                    console.warn("Blob download failed, using fallback", e);
+                    const hasParams = url.includes('?');
+                    const forcedUrl = `${url}${hasParams ? '&' : '?'}attname=${encodeURIComponent(name)}`;
+                    const iframe = document.createElement('iframe');
+                    iframe.style.display = 'none';
+                    iframe.src = forcedUrl;
+                    document.body.appendChild(iframe);
+                    setTimeout(() => document.body.removeChild(iframe), 60000);
+                }
+            };
+            
+            const handleDragStart = (e, task) => {
+                if (task.status === 'done' && task.resultUrl) {
+                    e.dataTransfer.effectAllowed = "copy";
+                    const url = task.resultUrl;
+                    const name = task.outputName || `${task.id}.png`;
+                    e.dataTransfer.setData("DownloadURL", `image/png:${name}:${url}`);
+                }
+            };
+
+            // Handlers
+            const handleStopTask = (task) => {
+                if (task.controller) task.controller.abort();
+                else update(task.id, { status: 'stopped', statusText: '已取消' });
+            };
+
+            // --- 重试/重画逻辑 (包含从 IDB 恢复文件) ---
+            const handleRegenerate = async (task) => {
+                let fileToUse = task.file;
+
+                // 1. 内存中没有文件，尝试从 IndexedDB 获取
+                if (!fileToUse) {
+                    try {
+                        log(`🔍 尝试恢复原文件: ${task.fileName || task.id}...`);
+                        const blob = await dbApi.getFile(task.id);
+                        if (blob) {
+                            fileToUse = new File([blob], task.fileName || "restored.png", { type: blob.type });
+                            log("✅ 原文件恢复成功");
+                        } else {
+                            log("❌ 无法恢复原文件 (缓存已清理)");
+                            return alert("原图片数据已彻底丢失，请重新上传。");
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        return alert("读取本地缓存失败");
+                    }
+                }
+
+                if (!fileToUse || !fileToUse.size) return alert("文件无效");
+
+                update(task.id, { 
+                    status: 'queued', 
+                    statusText: '重试排队...', 
+                    progress: 0, 
+                    controller: null,
+                    file: fileToUse // 重新挂载文件对象到内存状态
+                });
+            };
+            
+            const handleDeleteTask = async (id) => {
+                 const task = tasks.find(t => t.id === id);
+                 if (task && task.controller) task.controller.abort();
+                 
+                 // 从 IndexedDB 删除
+                 try { await dbApi.deleteFile(id); } catch(e){}
+
+                 setTasks(prev => prev.filter(t => t.id !== id));
+                 if (selectedIds.has(id)) {
+                     const newSet = new Set(selectedIds);
+                     newSet.delete(id);
+                     setSelectedIds(newSet);
+                 }
+            };
+            
+            const handleBatchDelete = async () => {
+                if (selectedIds.size === 0) return;
+                if (!confirm(`确定删除选中的 ${selectedIds.size} 个任务吗？`)) return;
+                
+                // 批量清理 IDB
+                for (const id of selectedIds) {
+                    try { await dbApi.deleteFile(id); } catch(e){}
+                }
+
+                tasks.forEach(t => {
+                    if (selectedIds.has(t.id) && t.controller) t.controller.abort();
+                });
+                setTasks(prev => prev.filter(t => !selectedIds.has(t.id)));
+                setSelectedIds(new Set());
+            };
+
+            const copyTask = async (t) => {
+                // 尝试获取源文件
+                let fileToUse = t.file;
+                if (!fileToUse) {
+                    try { fileToUse = await dbApi.getFile(t.id); } catch(e) {}
+                }
+
+                if(!fileToUse) return alert("原图片数据已丢失，无法复制");
+
+                const newId = Math.random().toString(36).substr(2,9);
+                // 保存新副本到 IDB
+                await dbApi.saveFile(newId, fileToUse);
+
+                const nt = {...t, id: newId, status:'queued', statusText:'副本排队', progress:0, resultUrl:null, controller:null, file: fileToUse};
+                setTasks(p => [nt, ...p]);
+            };
+
+            // Logic
+            const processTask = useCallback(async (tid, file, outName, mUrl) => {
+                const ctl = new AbortController();
+                setTasks(p => p.map(t => t.id===tid ? {...t, controller: ctl} : t));
+                let retries = 0;
+                
+                const delay = ms => new Promise((res,rej) => {
+                    const t = setTimeout(()=>{ctl.signal.removeEventListener('abort', onAbort); res();}, ms);
+                    const onAbort = () => { clearTimeout(t); rej(new DOMException('Aborted','AbortError')); };
+                    ctl.signal.addEventListener('abort', onAbort);
+                });
+
+                try {
+                    while(retries <= MAX_RETRIES) {
+                        try {
+                            if(ctl.signal.aborted) throw new DOMException('Aborted','AbortError');
+                            const cfg = configRef.current;
+                            
+                            const d = await getImageDimensions(file);
+                            const ratio = calculateBestRatio(d.w, d.h);
+
+                            update(tid, {status:'uploading', statusText:'上传主体...', progress:10});
+                            const sUrl = await uploadQiniu(file, cfg, ctl.signal);
+                            
+                            update(tid, {status:'submitting', statusText:'提交任务...', progress:30});
+                            const rid = await submitTask(sUrl, mUrl, ratio, cfg.prompt, cfg, ctl.signal);
+                            
+                            update(tid, {status:'processing', statusText:'生成中...', progress:40});
+                            const start = Date.now();
+                            let final = null;
+                            while(true) {
+                                if(ctl.signal.aborted) throw new DOMException('Aborted','AbortError');
+                                if(Date.now()-start > TASK_TIMEOUT_MS) throw new Error("超时");
+                                const d = await pollTask(rid, cfg, ctl.signal);
+                                update(tid, {progress: 40 + Math.floor((d.progress||0)*0.6), statusText:`生成 ${d.progress}%`});
+                                if(d.status==='succeeded') { if(d.results?.[0]?.url){ final=d.results[0].url; break; } throw new Error("无图"); }
+                                if(d.status==='failed') throw new Error(d.failure_reason||"失败");
+                                await delay(3000);
+                            }
+                            // 成功后，为了节省内存，React State 中的 file 可以设为 null，因为我们已经在 IDB 里存了一份
+                            // 但为了快速重试体验，这里暂时保留引用。刷新后自然会消失，通过 IDB 恢复。
+                            update(tid, {status:'done', statusText:'完成', progress:100, resultUrl:final}); 
+                            
+                            if (cfg.autoDownload) {
+                                download(final, outName);
+                            }
+                            
+                            log(`✅ 完成: ${file.name || 'Image'}`);
+                            return;
+                            
+                        } catch(e) {
+                            if(e.name==='AbortError') throw e;
+                            if(e.message.includes('FATAL_AUTH')) {
+                                update(tid, {status:'error', statusText:'Key错误', progress:0});
+                                return log(`❌ 认证失败: ${file.name}`);
+                            }
+                            retries++;
+                            if(retries<=MAX_RETRIES) {
+                                update(tid, {status:'retrying', statusText:`重试 ${retries}`, retryCount:retries});
+                                await delay(retries*2000);
+                            } else {
+                                update(tid, {status:'error', statusText:e.message.slice(0,20), progress:0});
+                                return log(`❌ 失败: ${file.name}`);
+                            }
+                        }
+                    }
+                } catch(e) {
+                    if(e.name==='AbortError') { update(tid, {status:'stopped', statusText:'已停止'}); log(`🛑 停止: ${file.name}`); }
+                }
+            }, []);
+
+            useEffect(() => {
+                const active = tasks.filter(t => ['uploading','submitting','processing','retrying'].includes(t.status)).length;
+                if(active < MAX_CONCURRENT_TASKS) {
+                    const next = tasks.find(t => t.status === 'queued');
+                    if(next) {
+                        update(next.id, {status:'uploading'});
+                        if(next.file) {
+                            // 内存中有文件直接用
+                            if(next.modelUrl) processTask(next.id, next.file, next.outputName, next.modelUrl);
+                            else update(next.id, {status:'error', statusText:'无模特'});
+                        } else {
+                            // 内存无文件（刷新后），先从 IDB 捞
+                            dbApi.getFile(next.id).then(blob => {
+                                if (blob) {
+                                    const restoredFile = new File([blob], next.fileName, {type:blob.type});
+                                    update(next.id, {file: restoredFile}); // 补回内存
+                                    if(next.modelUrl) processTask(next.id, restoredFile, next.outputName, next.modelUrl);
+                                    else update(next.id, {status:'error', statusText:'无模特'});
+                                } else {
+                                    update(next.id, {status:'error', statusText:'源文件丢失'});
+                                }
+                            });
+                        }
+                    }
+                }
+            }, [tasks, processTask]);
+
+            const startBatch = async () => {
+                if(!subjects.length || !modelImage) return alert("请上传主体(图1)和模特(图2)");
+                if(!config.nanoApiKey) return setShowSettings(true);
+                
+                log("🚀 加入队列...");
+                let mUrl = "";
+                try {
+                    const c = new AbortController();
+                    log("☁️ 上传模特...");
+                    mUrl = await uploadQiniu(modelImage.file, config, c.signal);
+                } catch(e) { return log(`❌ 模特上传失败: ${e.message}`); }
+                
+                // 准备任务数据
+                const tasksToCreate = [];
+                for (const s of subjects) {
+                    const now = new Date();
+                    const dateStr = now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
+                    const rand = Math.random().toString(36).substring(2, 10).padEnd(8, '0'); 
+                    const name = `${dateStr}_${rand}.png`;
+                    const taskId = Math.random().toString(36).substr(2,9);
+
+                    // 1. 保存文件到 IndexedDB (关键)
+                    try {
+                        await dbApi.saveFile(taskId, s.file);
+                    } catch(e) {
+                        console.error("IDB Save Failed", e);
+                        log("⚠️ 缓存失败，刷新将丢失进度");
+                    }
+
+                    tasksToCreate.push({
+                        id: taskId,
+                        file: s.file, 
+                        fileName: s.file.name, // 保存文件名字符串用于恢复
+                        thumbnail: s.thumbnail,
+                        outputName: outputDir ? `${outputDir}_${name}` : name,
+                        status: 'queued', statusText: '排队', progress: 0,
+                        resultUrl: null, timestamp: new Date().toLocaleTimeString(),
+                        modelUrl: mUrl
+                    });
+                }
+
+                setTasks(p => [...tasksToCreate, ...p]);
+                setSubjects([]);
+            };
+
+            const toggleSel = id => setSelectedIds(p => { const n=new Set(p); n.has(id)?n.delete(id):n.add(id); return n; });
+            const selAll = () => {
+                if (tasks.length > 0 && tasks.every(t => selectedIds.has(t.id))) {
+                    setSelectedIds(new Set());
+                } else {
+                    const newSet = new Set();
+                    tasks.forEach(t => newSet.add(t.id));
+                    setSelectedIds(newSet);
+                }
+            };
+            const dlSel = async () => {
+                const ts = tasks.filter(t => selectedIds.has(t.id) && t.resultUrl);
+                if(!ts.length) return alert("没有可下载的成功任务");
+                log(`⬇️ 批量下载 ${ts.length} 张...`);
+                for(const t of ts) { download(t.resultUrl, t.outputName); await new Promise(r=>setTimeout(r,500)); }
+            };
+
+            return (
+                <div className="min-h-screen bg-[#0f172a] text-slate-200 font-sans flex flex-col h-screen overflow-hidden">
+                    {/* Settings */}
+                    {showSettings && (
+                        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-2xl shadow-2xl p-6 space-y-4">
+                                <div className="flex justify-between items-center pb-2 border-b border-slate-700">
+                                    <h3 className="font-bold flex items-center gap-2"><Icons.Settings className="w-5 h-5 text-purple-400"/> 设置 (自动保存)</h3>
+                                    <button onClick={()=>setShowSettings(false)}><Icons.X className="w-5 h-5"/></button>
+                                </div>
+                                
+                                {/* New: Quality Selector */}
+                                <div className="bg-slate-900 p-3 rounded border border-slate-700 flex flex-col gap-2">
+                                     <div className="text-xs font-bold text-slate-300 flex items-center gap-2">
+                                         <Icons.Box className="w-4 h-4 text-blue-400"/> 输出分辨率 (Image Size)
+                                     </div>
+                                     <div className="flex gap-4 mt-1">
+                                         <label className={`flex-1 flex items-center justify-center gap-2 p-2 rounded cursor-pointer border ${config.outputQuality==='2K'?'bg-blue-900/50 border-blue-500 text-blue-300':'bg-slate-800 border-slate-700 hover:bg-slate-700'}`}>
+                                             <input type="radio" name="quality" checked={config.outputQuality==='2K'} onChange={()=>setConfig({...config, outputQuality:'2K'})} className="hidden" />
+                                             <span className="font-bold">2K</span> <span className="text-[10px] opacity-60">标准 (省积分)</span>
+                                         </label>
+                                         <label className={`flex-1 flex items-center justify-center gap-2 p-2 rounded cursor-pointer border ${config.outputQuality==='4K'?'bg-purple-900/50 border-purple-500 text-purple-300':'bg-slate-800 border-slate-700 hover:bg-slate-700'}`}>
+                                             <input type="radio" name="quality" checked={config.outputQuality==='4K'} onChange={()=>setConfig({...config, outputQuality:'4K'})} className="hidden" />
+                                             <span className="font-bold">4K</span> <span className="text-[10px] opacity-60">高清 (推荐)</span>
+                                         </label>
+                                     </div>
+                                </div>
+
+                                {/* Auto Download Toggle */}
+                                <div className="bg-slate-900 p-3 rounded border border-slate-700 flex items-center justify-between">
+                                    <span className="text-xs font-bold text-slate-300 flex items-center gap-2">
+                                        <Icons.Download className="w-4 h-4 text-green-500"/> 任务完成后自动下载
+                                    </span>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" checked={config.autoDownload} onChange={e=>setConfig({...config, autoDownload:e.target.checked})} className="custom-checkbox w-4 h-4" />
+                                        <span className="text-xs text-slate-500">{config.autoDownload?'已开启':'已关闭'}</span>
+                                    </label>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-xs text-yellow-500 font-bold">NANO BANANA KEY</label>
+                                    <input type="password" value={config.nanoApiKey} onChange={e=>setConfig({...config, nanoApiKey:e.target.value.trim()})} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4 pt-2">
+                                    <div className="col-span-2 text-xs font-bold text-slate-400">七牛云存储</div>
+                                    <input type="password" value={config.qiniuAk} onChange={e=>setConfig({...config, qiniuAk:e.target.value.trim()})} className="bg-slate-900 border border-slate-700 rounded p-2 text-xs" placeholder="AK" />
+                                    <input type="password" value={config.qiniuSk} onChange={e=>setConfig({...config, qiniuSk:e.target.value.trim()})} className="bg-slate-900 border border-slate-700 rounded p-2 text-xs" placeholder="SK" />
+                                    <input type="text" value={config.qiniuBucket} onChange={e=>setConfig({...config, qiniuBucket:e.target.value.trim()})} className="bg-slate-900 border border-slate-700 rounded p-2 text-xs" placeholder="Bucket" />
+                                    <input type="text" value={config.qiniuDomain} onChange={e=>setConfig({...config, qiniuDomain:e.target.value.trim()})} className="bg-slate-900 border border-slate-700 rounded p-2 text-xs" placeholder="Domain" />
+                                </div>
+                                <div className="pt-2 flex justify-between">
+                                    <button onClick={()=>{if(confirm('恢复默认配置？'))setConfig(DEFAULT_CFG)}} className="text-xs text-red-400">恢复默认</button>
+                                    <button onClick={()=>setShowSettings(false)} className="bg-blue-600 px-4 py-1 rounded text-sm">关闭</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Preview */}
+                    {preview && (
+                        <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center p-4">
+                           <button onClick={()=>setPreview(null)} className="absolute top-4 right-4 bg-slate-800 p-2 rounded-full border border-slate-600"><Icons.X className="w-6 h-6 text-white"/></button>
+                           <img src={preview.url} className="max-w-full max-h-[85vh] object-contain rounded border border-slate-700 shadow-2xl" />
+                           <div className="mt-4 flex gap-4">
+                              <span className="bg-slate-900 px-4 py-1 rounded-full text-sm border border-slate-700">{preview.name}</span>
+                              <button onClick={()=>download(preview.url, preview.name)} className="flex gap-2 bg-yellow-500 text-black px-4 py-1 rounded-full font-bold"><Icons.Download className="w-4 h-4"/> 保存</button>
+                           </div>
+                        </div>
+                    )}
+
+                    {/* Header */}
+                    <header className="bg-slate-900 border-b border-slate-800 p-3 shrink-0 flex justify-between items-center shadow-md z-20">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-gradient-to-br from-yellow-400 to-orange-500 p-1.5 rounded text-black"><Icons.Zap className="w-5 h-5"/></div>
+                            <div>
+                                <h1 className="text-lg font-bold text-white tracking-wide">NanoBanana <span className="text-yellow-400">Pro</span></h1>
+                                <p className="text-[10px] text-slate-500 font-mono tracking-widest">GALLERY BATCHER</p>
+                            </div>
+                        </div>
+                        <div className="flex gap-3">
+                            <div className="px-3 py-1.5 rounded-full border border-slate-700 bg-slate-800 text-xs font-bold text-slate-400 flex items-center gap-2">
+                                <Icons.Box className="w-3 h-3"/> {config.outputQuality}
+                            </div>
+                            <button onClick={()=>setUseRealApi(!useRealApi)} className={`flex gap-2 px-3 py-1.5 rounded-full border text-xs font-bold transition-all ${useRealApi?'bg-green-500/10 border-green-500 text-green-400':'bg-purple-500/10 border-purple-500 text-purple-400'}`}>
+                                {useRealApi ? <Icons.Globe className="w-3 h-3"/> : <Icons.Lock className="w-3 h-3"/>} {useRealApi?"真实 API":"模拟模式"}
+                            </button>
+                            <button onClick={()=>setShowSettings(true)} className="p-2 hover:bg-slate-800 rounded-full text-slate-400 hover:text-white"><Icons.Settings className="w-5 h-5"/></button>
+                        </div>
+                    </header>
+
+                    <div className="flex flex-1 overflow-hidden">
+                        {/* Sidebar */}
+                        <div className="w-80 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 z-10 shadow-xl">
+                            <div className="p-4 flex-1 overflow-y-auto custom-scrollbar space-y-4">
+                                {/* 1. Subject Queue (Moved Top) */}
+                                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                                    <div className="flex justify-between items-center mb-3">
+                                        <h2 className="text-xs font-bold text-purple-400 flex items-center gap-2">
+                                            <span className="w-5 h-5 rounded bg-purple-500 text-black flex items-center justify-center text-xs">1</span> 
+                                            主体队列 (图1)
+                                        </h2>
+                                        <span className="text-[10px] bg-slate-700 px-2 py-0.5 rounded">{subjects.length}</span>
+                                    </div>
+                                    <div 
+                                        className="h-32 overflow-y-auto pr-1 custom-scrollbar bg-slate-900/50 rounded-lg p-2 border-2 border-dashed border-slate-700 hover:border-purple-500/50 transition-colors grid grid-cols-3 gap-2"
+                                        onDragOver={e=>{e.preventDefault();e.stopPropagation()}} 
+                                        onDrop={e=>{e.preventDefault();e.stopPropagation();(async()=>{const f=Array.from(e.dataTransfer.files);if(f.length){const n=await Promise.all(f.map(async x=>({id:Math.random().toString(36).slice(2),file:x,thumbnail:await createThumbnail(x)})));setSubjects(p=>[...p,...n])}})()}}
+                                        onClick={()=>fileInputRef.current?.click()}
+                                    >
+                                        <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*" onChange={async e=>{const f=Array.from(e.target.files);const n=await Promise.all(f.map(async x=>({id:Math.random().toString(36).slice(2),file:x,thumbnail:await createThumbnail(x)})));setSubjects(p=>[...p,...n])}} />
+                                        {subjects.length===0 && <div className="col-span-3 flex flex-col items-center justify-center text-slate-600 h-full"><Icons.Plus className="w-6 h-6 mb-1 opacity-50"/><span className="text-[10px]">点击/拖入图片</span></div>}
+                                        {subjects.map(s=>(
+                                            <div key={s.id} className="relative aspect-square rounded overflow-hidden group border border-slate-700">
+                                                <img src={s.thumbnail} className="w-full h-full object-cover"/>
+                                                <button onClick={e=>{e.stopPropagation();setSubjects(p=>p.filter(x=>x.id!==s.id))}} className="absolute top-0 right-0 bg-red-500 text-white p-0.5 opacity-0 group-hover:opacity-100"><Icons.X className="w-3 h-3"/></button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* 2. Model (Moved Down) */}
+                                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                                    <h2 className="text-xs font-bold text-blue-400 mb-3 flex items-center gap-2">
+                                        <span className="w-5 h-5 rounded bg-blue-500 text-black flex items-center justify-center text-xs">2</span> 
+                                        参考模特 (图2)
+                                    </h2>
+                                    <div 
+                                        className="relative h-32 border-2 border-dashed border-slate-700 rounded-lg hover:border-blue-500 hover:bg-slate-700/50 transition-colors cursor-pointer overflow-hidden flex flex-col items-center justify-center group"
+                                        onClick={()=>modelInputRef.current?.click()}
+                                        onDragOver={e=>{e.preventDefault();e.stopPropagation()}} 
+                                        onDrop={e=>{e.preventDefault();e.stopPropagation();const f=e.dataTransfer.files[0];if(f){(async()=>{const t=await createThumbnail(f);setModelImage({file:f,thumbnail:t})})()}}}
+                                    >
+                                        <input type="file" ref={modelInputRef} className="hidden" accept="image/*" onChange={async e=>{const f=e.target.files[0];if(f){const t=await createThumbnail(f);setModelImage({file:f,thumbnail:t})}}} />
+                                        {modelImage ? (
+                                            <img src={modelImage.thumbnail} className="absolute inset-0 w-full h-full object-contain bg-black/40 p-2" />
+                                        ) : (
+                                            <div className="text-center text-slate-500 group-hover:text-blue-400"><Icons.Upload className="w-6 h-6 mx-auto mb-1 opacity-50"/><span className="text-[10px]">点击换图2</span></div>
+                                        )}
+                                    </div>
+                                    
+                                    {/* Local Path Input */}
+                                    <div className="mt-3 flex items-center gap-2">
+                                        <input 
+                                            type="text" 
+                                            className="flex-1 bg-slate-900 border border-slate-700 rounded p-1.5 text-[10px] text-slate-300 focus:border-blue-500 outline-none"
+                                            placeholder="粘贴本地模特库路径 (备注)"
+                                            value={config.localModelPath || ''}
+                                            onChange={e=>setConfig({...config, localModelPath:e.target.value})}
+                                        />
+                                        <button 
+                                            className="bg-slate-700 hover:bg-slate-600 text-slate-300 p-1.5 rounded border border-slate-600 transition-colors"
+                                            onClick={()=>modelInputRef.current?.click()}
+                                            title="打开文件选择器"
+                                        >
+                                            <Icons.Folder className="w-4 h-4"/>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* 3. Prompt Config (New) */}
+                                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                                    <h2 className="text-xs font-bold text-yellow-500 mb-2 flex items-center gap-2">
+                                        <Icons.Edit className="w-4 h-4"/> 提示词配置 (图1换图2)
+                                    </h2>
+                                    <textarea 
+                                        className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-[10px] text-slate-300 h-24 focus:border-yellow-500 outline-none resize-none custom-scrollbar"
+                                        value={config.prompt}
+                                        onChange={e=>setConfig({...config, prompt:e.target.value})}
+                                    />
+                                    <div className="text-[9px] text-slate-500 mt-1 text-right">修改后自动保存</div>
+                                </div>
+
+                                {/* Start Controls */}
+                                <div className="space-y-2">
+                                    <div className="flex items-center bg-slate-900 rounded px-2 border border-slate-700">
+                                        <Icons.Folder className="w-3 h-3 text-yellow-500 mr-2" />
+                                        <input type="text" value={outputDir} onChange={e => setOutputDir(e.target.value)} className="bg-transparent border-none text-yellow-500 w-full text-xs py-2 focus:ring-0" placeholder="输出前缀" />
+                                    </div>
+                                    <button onClick={startBatch} className="w-full py-3 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black font-bold rounded-lg shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-transform">
+                                        <Icons.Play className="w-4 h-4 fill-black" /> 加入生图队列
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            {/* Logs */}
+                            <div className="h-32 bg-black/40 border-t border-slate-800 p-2 overflow-y-auto custom-scrollbar font-mono text-[9px] text-slate-400">
+                                {logs.map((l,i)=><div key={i}>{l}</div>)}
+                            </div>
+                        </div>
+
+                        {/* Main Gallery Area */}
+                        <div className="flex-1 bg-slate-950 p-6 overflow-y-auto custom-scrollbar relative">
+                            {/* Toolbar */}
+                            <div className="flex justify-between items-center mb-6 sticky top-0 bg-slate-950/90 backdrop-blur z-10 py-2 border-b border-slate-800">
+                                <div className="flex items-center gap-4">
+                                    <h2 className="text-xl font-bold flex items-center gap-2 text-slate-200">
+                                        <Icons.Layers className="w-6 h-6 text-blue-500"/> 任务画廊
+                                        <span className="text-sm font-normal text-slate-500 ml-2 bg-slate-900 px-2 py-0.5 rounded-full border border-slate-800">{tasks.length} 任务</span>
+                                    </h2>
+                                    {/* New: Selection Controls */}
+                                    <div className="flex items-center gap-2 bg-slate-800 px-2 py-1 rounded border border-slate-700">
+                                        <input 
+                                            type="checkbox" 
+                                            className="custom-checkbox"
+                                            checked={tasks.length > 0 && selectedIds.size === tasks.length}
+                                            onChange={selAll}
+                                            title="全选所有任务"
+                                        />
+                                        <span className="text-xs text-slate-400">全选</span>
+                                    </div>
+                                    {selectedIds.size > 0 && (
+                                        <div className="flex gap-2">
+                                            <button 
+                                                onClick={dlSel} 
+                                                className="flex items-center gap-1 bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded text-xs font-bold transition-all"
+                                            >
+                                                <Icons.Download className="w-3 h-3"/> 下载选中 ({selectedIds.size})
+                                            </button>
+                                            <button 
+                                                onClick={handleBatchDelete} 
+                                                className="flex items-center gap-1 bg-red-900/50 hover:bg-red-600 text-red-200 hover:text-white px-3 py-1 rounded text-xs font-bold transition-all border border-red-800"
+                                            >
+                                                <Icons.Trash2 className="w-3 h-3"/> 删除选中
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex gap-2">
+                                    <button onClick={()=>setTasks(p=>p.filter(t=>t.status!=='done'))} className="p-2 hover:bg-slate-900 rounded-full text-slate-500 hover:text-white" title="清理完成"><Icons.Trash2 className="w-4 h-4"/></button>
+                                    <button onClick={()=>setTasks([])} className="p-2 hover:bg-red-900/30 rounded-full text-slate-500 hover:text-red-400" title="清空全部"><Icons.X className="w-4 h-4"/></button>
+                                </div>
+                            </div>
+
+                            {/* Grid */}
+                            {tasks.length === 0 ? (
+                                <div className="h-[60vh] flex flex-col items-center justify-center text-slate-700">
+                                    <Icons.ImageIcon className="w-24 h-24 opacity-10 mb-4"/>
+                                    <p className="text-lg font-medium">任务列表为空</p>
+                                    <p className="text-sm opacity-50">请在左侧添加图片并开始任务</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                                    {tasks.map(task => (
+                                        <div key={task.id} className={`task-card group relative bg-slate-900 rounded-xl overflow-hidden border shadow-xl transition-all duration-300 aspect-[3/4] flex flex-col ${selectedIds.has(task.id) ? 'border-blue-500 ring-1 ring-blue-500' : 'border-slate-800 hover:border-slate-600 hover:shadow-2xl'}`} draggable="true" onDragStart={(e)=>handleDragStart(e, task)}>
+                                            {/* Header Overlay */}
+                                            <div className="absolute top-0 left-0 right-0 p-3 flex justify-between items-start z-10 bg-gradient-to-b from-black/60 to-transparent">
+                                                <div className="flex items-center gap-2">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        className="custom-checkbox shadow-md" 
+                                                        checked={selectedIds.has(task.id)} 
+                                                        onChange={() => toggleSel(task.id)} 
+                                                    />
+                                                    {!['done'].includes(task.status) && (
+                                                        <div className={`text-[10px] px-2 py-0.5 rounded font-bold shadow-sm ${
+                                                            task.status==='error'?'bg-red-500 text-white':
+                                                            task.status==='stopped'?'bg-slate-500 text-white':
+                                                            'bg-blue-500 text-white animate-pulse'
+                                                        }`}>{task.statusText}</div>
+                                                    )}
+                                                </div>
+                                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button onClick={()=>copyTask(task)} className="p-1.5 bg-black/40 hover:bg-purple-600 text-white rounded backdrop-blur-sm transition-colors" title="复制任务">
+                                                        <Icons.Copy className="w-3 h-3"/>
+                                                    </button>
+                                                    <button onClick={()=>handleDeleteTask(task.id)} className="p-1.5 bg-black/40 hover:bg-red-600 text-white rounded backdrop-blur-sm transition-colors" title="删除任务">
+                                                        <Icons.X className="w-3 h-3"/>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            {/* Image Area */}
+                                            <div className="flex-1 relative bg-slate-950 flex items-center justify-center overflow-hidden cursor-pointer" 
+                                                 onClick={() => task.resultUrl && setPreview({url:task.resultUrl, name:task.outputName})}>
+                                                <img src={task.resultUrl || task.thumbnail} className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${task.status==='done'?'':'opacity-50 blur-sm'}`} />
+                                                {/* Center Status Icon */}
+                                                {!['done'].includes(task.status) && (
+                                                    <div className="absolute inset-0 flex flex-col items-center justify-center z-0">
+                                                        {task.status==='error' ? <Icons.AlertCircle className="w-10 h-10 text-red-500 drop-shadow-lg"/> :
+                                                         task.status==='stopped' ? <Icons.StopCircle className="w-10 h-10 text-slate-400 drop-shadow-lg"/> :
+                                                         task.status==='queued' ? <Icons.Layers className="w-10 h-10 text-blue-500 drop-shadow-lg"/> :
+                                                         <div className="w-8 h-8 border-4 border-white/20 border-t-blue-500 rounded-full animate-spin drop-shadow-lg"/>}
+                                                        <span className="mt-2 text-xs font-bold text-white drop-shadow-md bg-black/30 px-2 rounded">{task.progress}%</span>
+                                                    </div>
+                                                )}
+                                                {/* Hover Overlay for Done */}
+                                                {task.status === 'done' && (
+                                                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                        <div className="bg-black/60 rounded-full p-3 backdrop-blur-sm text-white scale-90 group-hover:scale-100 transition-transform">
+                                                            <Icons.Maximize className="w-6 h-6"/>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Bottom Action Bar (Glassmorphism) */}
+                                            <div className="absolute bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-md border-t border-slate-700/50 p-3 flex flex-col gap-2 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                                                <div className="text-[10px] text-slate-400 truncate font-mono">{task.file?.name || task.fileName}</div>
+                                                <div className="flex justify-between items-center">
+                                                    {(task.status==='processing'||task.status==='uploading'||task.status==='queued') && (
+                                                        <button onClick={()=>handleStopTask(task)} className="flex-1 bg-red-500/20 hover:bg-red-500 text-red-300 hover:text-white py-1.5 rounded text-xs transition-colors font-medium">停止</button>
+                                                    )}
+                                                    {(task.status==='done'||task.status==='error'||task.status==='stopped') && (
+                                                        <button onClick={()=>handleRegenerate(task)} className="flex-1 bg-slate-700 hover:bg-blue-600 text-slate-300 hover:text-white py-1.5 rounded text-xs transition-colors font-medium flex items-center justify-center gap-1">
+                                                            <Icons.RefreshCw className="w-3 h-3"/> {task.status==='done'?'重画':'重试'}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Progress Bar (Visible when not hovering) */}
+                                            <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-800 group-hover:opacity-0 transition-opacity">
+                                                <div className={`h-full transition-all duration-500 ${task.status==='done'?'bg-green-500':task.status==='error'?'bg-red-500':'bg-blue-500'}`} style={{width:`${task.progress}%`}}/>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<ErrorBoundary><MainApp /></ErrorBoundary>);
+    </script>
+</body>
+</html>
