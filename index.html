@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NanoBanana Pro - 批量生图控制台 (IDB持久化版)</title>
+    <title>NanoBanana Pro - 批量生图控制台 (V2 逻辑互换版)</title>
     <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- 引入 React 和 ReactDOM -->
@@ -44,23 +44,17 @@
             CheckCircle: (p) => <Icon {...p} path={<><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>} />,
             CloudUpload: (p) => <Icon {...p} path={<><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></>} />,
             Copy: (p) => <Icon {...p} path={<><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></>} />,
-            Cpu: (p) => <Icon {...p} path={<><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></>} />,
             Download: (p) => <Icon {...p} path={<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></>} />,
             Edit: (p) => <Icon {...p} path={<><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></>} />,
-            Eye: (p) => <Icon {...p} path={<><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></>} />,
             Folder: (p) => <Icon {...p} path={<><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></>} />,
             Globe: (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></>} />,
             ImageIcon: (p) => <Icon {...p} path={<><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></>} />,
-            Key: (p) => <Icon {...p} path={<><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-1.777-1.777L13.17 12l.313.313 3.536 3.536 1.414 1.414.707.707 2.121-2.121"/></>} />,
             Layers: (p) => <Icon {...p} path={<><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></>} />,
             Lock: (p) => <Icon {...p} path={<><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>} />,
             Maximize: (p) => <Icon {...p} path={<><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></>} />,
             Play: (p) => <Icon {...p} path={<><polygon points="5 3 19 12 5 21 5 3"/></>} />,
             Plus: (p) => <Icon {...p} path={<><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></>} />,
-            Power: (p) => <Icon {...p} path={<><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></>} />,
             RefreshCw: (p) => <Icon {...p} path={<><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></>} />,
-            RotateCcw: (p) => <Icon {...p} path={<><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></>} />,
-            Save: (p) => <Icon {...p} path={<><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></>} />,
             Settings: (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></>} />,
             StopCircle: (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="10"/><rect x="9" y="9" width="6" height="6"/></>} />,
             Trash2: (p) => <Icon {...p} path={<><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></>} />,
@@ -127,6 +121,7 @@
         const QINIU_UPLOAD_URL = "https://up-z2.qiniup.com";
         const MAX_RETRIES = 10;
         const TASK_TIMEOUT_MS = 600 * 1000;
+        // 提示词稍微调整以适配新的逻辑描述
         const DEFAULT_PROMPT = "保持图片不变，保持动作不变，保持表情不变，让图1的人换成图2的，让图1的脸也换成图2的，让图1的服装也换成图2的。";
 
         // --- Utils ---
@@ -181,8 +176,20 @@
             } catch(e) { if(e.name!=='AbortError') throw e; throw e; }
         };
 
-        const submitTask = async (sUrl, mUrl, ratio, prompt, cfg, signal) => {
-            const body = { model: AI_MODEL_NAME, prompt, aspectRatio: ratio, imageSize: cfg.outputQuality || "4K", urls: [sUrl, mUrl], webHook: "-1", shutProgress: false };
+        // NEW: sUrl = Image1, mUrl = Image2 (To match logic: [Img1, Img2])
+        // Updated Signature: url1 (Fixed), url2 (Batch Item)
+        const submitTask = async (url1, url2, ratio, prompt, cfg, signal) => {
+            // 核心修改：urls 顺序为 [url1, url2]
+            const body = { 
+                model: AI_MODEL_NAME, 
+                prompt, 
+                aspectRatio: ratio, 
+                imageSize: cfg.outputQuality || "4K", 
+                urls: [url1, url2], // ORDER IS CRITICAL: Image 1 then Image 2
+                webHook: "-1", 
+                shutProgress: false 
+            };
+            
             const res = await fetch(API_SUBMIT_URL, {
                 method: 'POST', headers: {'Content-Type':'application/json', 'Authorization':`Bearer ${cfg.nanoApiKey.trim()}`},
                 body: JSON.stringify(body), signal
@@ -222,8 +229,8 @@
         // --- Main App ---
         function MainApp() {
             // State
-            const [subjects, setSubjects] = useState([]);
-            const [modelImage, setModelImage] = useState(null);
+            const [batchQueue, setBatchQueue] = useState([]); // Renamed from subjects to batchQueue (Image 2s)
+            const [fixedImage, setFixedImage] = useState(null); // Renamed from modelImage to fixedImage (Image 1)
             const [outputDir, setOutputDir] = useState("Result");
             const [tasks, setTasks] = useState(() => { try{ return JSON.parse(localStorage.getItem('nano_history_v2'))||[]; }catch{return[];} });
             const [selectedIds, setSelectedIds] = useState(new Set());
@@ -242,7 +249,7 @@
                 prompt: DEFAULT_PROMPT,
                 localModelPath: '',
                 autoDownload: true,
-                outputQuality: '4K' // New: Default Quality
+                outputQuality: '4K'
             };
             const [config, setConfig] = useState(() => {
                 const s = localStorage.getItem('nano_banana_config');
@@ -252,7 +259,7 @@
 
             // Refs
             const fileInputRef = useRef(null);
-            const modelInputRef = useRef(null);
+            const fixedInputRef = useRef(null);
             const tasksRef = useRef(tasks); tasksRef.current = tasks;
             const configRef = useRef(config); configRef.current = config;
 
@@ -261,17 +268,17 @@
             useEffect(() => {
                 const save = tasks.map(t=>({
                     id:t.id, 
-                    fileName: t.file?.name||t.fileName, // Store filename string
+                    fileName: t.file?.name||t.fileName,
                     thumbnail: t.thumbnail, 
                     outputName:t.outputName,
-                    status: t.status === 'processing' || t.status === 'uploading' ? 'stopped' : t.status, // Don't persist active states
+                    status: t.status === 'processing' || t.status === 'uploading' ? 'stopped' : t.status, 
                     statusText: t.status === 'processing' || t.status === 'uploading' ? '异常中断' : t.statusText,
                     progress: t.status === 'done' ? 100 : t.progress,
                     resultUrl:t.resultUrl, 
                     timestamp:t.timestamp,
-                    modelUrl: t.modelUrl
+                    fixedUrl: t.fixedUrl // Renamed from modelUrl to fixedUrl
                 }));
-                try{ localStorage.setItem('nano_history_v2', JSON.stringify(save.slice(0,50))); }catch{} // Save last 50
+                try{ localStorage.setItem('nano_history_v2', JSON.stringify(save.slice(0,50))); }catch{} 
             }, [tasks]);
 
             // Drag Prevent
@@ -285,7 +292,7 @@
             const log = (m) => setLogs(p => [`[${new Date().toLocaleTimeString()}] ${typeof m==='string'?m:'Error'}`, ...p].slice(0,50));
             const update = (id, d) => setTasks(p => p.map(t => t.id===id ? {...t, ...d} : t));
             
-            // --- 下载函数 (防跳转核心逻辑) ---
+            // --- 下载函数 ---
             const download = async (url, name) => {
                 try {
                     const res = await fetch(url);
@@ -328,11 +335,8 @@
                 else update(task.id, { status: 'stopped', statusText: '已取消' });
             };
 
-            // --- 重试/重画逻辑 (包含从 IDB 恢复文件) ---
             const handleRegenerate = async (task) => {
                 let fileToUse = task.file;
-
-                // 1. 内存中没有文件，尝试从 IndexedDB 获取
                 if (!fileToUse) {
                     try {
                         log(`🔍 尝试恢复原文件: ${task.fileName || task.id}...`);
@@ -345,7 +349,6 @@
                             return alert("原图片数据已彻底丢失，请重新上传。");
                         }
                     } catch (e) {
-                        console.error(e);
                         return alert("读取本地缓存失败");
                     }
                 }
@@ -357,17 +360,14 @@
                     statusText: '重试排队...', 
                     progress: 0, 
                     controller: null,
-                    file: fileToUse // 重新挂载文件对象到内存状态
+                    file: fileToUse 
                 });
             };
             
             const handleDeleteTask = async (id) => {
                  const task = tasks.find(t => t.id === id);
                  if (task && task.controller) task.controller.abort();
-                 
-                 // 从 IndexedDB 删除
                  try { await dbApi.deleteFile(id); } catch(e){}
-
                  setTasks(prev => prev.filter(t => t.id !== id));
                  if (selectedIds.has(id)) {
                      const newSet = new Set(selectedIds);
@@ -379,12 +379,9 @@
             const handleBatchDelete = async () => {
                 if (selectedIds.size === 0) return;
                 if (!confirm(`确定删除选中的 ${selectedIds.size} 个任务吗？`)) return;
-                
-                // 批量清理 IDB
                 for (const id of selectedIds) {
                     try { await dbApi.deleteFile(id); } catch(e){}
                 }
-
                 tasks.forEach(t => {
                     if (selectedIds.has(t.id) && t.controller) t.controller.abort();
                 });
@@ -393,24 +390,21 @@
             };
 
             const copyTask = async (t) => {
-                // 尝试获取源文件
                 let fileToUse = t.file;
                 if (!fileToUse) {
                     try { fileToUse = await dbApi.getFile(t.id); } catch(e) {}
                 }
-
                 if(!fileToUse) return alert("原图片数据已丢失，无法复制");
 
                 const newId = Math.random().toString(36).substr(2,9);
-                // 保存新副本到 IDB
                 await dbApi.saveFile(newId, fileToUse);
 
                 const nt = {...t, id: newId, status:'queued', statusText:'副本排队', progress:0, resultUrl:null, controller:null, file: fileToUse};
                 setTasks(p => [nt, ...p]);
             };
 
-            // Logic
-            const processTask = useCallback(async (tid, file, outName, mUrl) => {
+            // Logic - Process Task
+            const processTask = useCallback(async (tid, batchFile, outName, fixedUrl) => {
                 const ctl = new AbortController();
                 setTasks(p => p.map(t => t.id===tid ? {...t, controller: ctl} : t));
                 let retries = 0;
@@ -427,14 +421,17 @@
                             if(ctl.signal.aborted) throw new DOMException('Aborted','AbortError');
                             const cfg = configRef.current;
                             
-                            const d = await getImageDimensions(file);
+                            // 1. Calculate Ratio from Image 2 (Batch File) - 核心修改：使用图2 (序列图) 的比例
+                            const d = await getImageDimensions(batchFile);
                             const ratio = calculateBestRatio(d.w, d.h);
 
-                            update(tid, {status:'uploading', statusText:'上传主体...', progress:10});
-                            const sUrl = await uploadQiniu(file, cfg, ctl.signal);
+                            // 2. Upload Image 2 (Batch File) - 核心修改：上传图2
+                            update(tid, {status:'uploading', statusText:'上传图2...', progress:10});
+                            const batchUrl = await uploadQiniu(batchFile, cfg, ctl.signal);
                             
+                            // 3. Submit Task (Order: Image 1, Image 2) - 核心修改：提交顺序 fixedUrl(图1), batchUrl(图2)
                             update(tid, {status:'submitting', statusText:'提交任务...', progress:30});
-                            const rid = await submitTask(sUrl, mUrl, ratio, cfg.prompt, cfg, ctl.signal);
+                            const rid = await submitTask(fixedUrl, batchUrl, ratio, cfg.prompt, cfg, ctl.signal);
                             
                             update(tid, {status:'processing', statusText:'生成中...', progress:40});
                             const start = Date.now();
@@ -448,22 +445,20 @@
                                 if(d.status==='failed') throw new Error(d.failure_reason||"失败");
                                 await delay(3000);
                             }
-                            // 成功后，为了节省内存，React State 中的 file 可以设为 null，因为我们已经在 IDB 里存了一份
-                            // 但为了快速重试体验，这里暂时保留引用。刷新后自然会消失，通过 IDB 恢复。
                             update(tid, {status:'done', statusText:'完成', progress:100, resultUrl:final}); 
                             
                             if (cfg.autoDownload) {
                                 download(final, outName);
                             }
                             
-                            log(`✅ 完成: ${file.name || 'Image'}`);
+                            log(`✅ 完成: ${batchFile.name || 'Image'}`);
                             return;
                             
                         } catch(e) {
                             if(e.name==='AbortError') throw e;
                             if(e.message.includes('FATAL_AUTH')) {
                                 update(tid, {status:'error', statusText:'Key错误', progress:0});
-                                return log(`❌ 认证失败: ${file.name}`);
+                                return log(`❌ 认证失败: ${batchFile.name}`);
                             }
                             retries++;
                             if(retries<=MAX_RETRIES) {
@@ -471,12 +466,12 @@
                                 await delay(retries*2000);
                             } else {
                                 update(tid, {status:'error', statusText:e.message.slice(0,20), progress:0});
-                                return log(`❌ 失败: ${file.name}`);
+                                return log(`❌ 失败: ${batchFile.name}`);
                             }
                         }
                     }
                 } catch(e) {
-                    if(e.name==='AbortError') { update(tid, {status:'stopped', statusText:'已停止'}); log(`🛑 停止: ${file.name}`); }
+                    if(e.name==='AbortError') { update(tid, {status:'stopped', statusText:'已停止'}); log(`🛑 停止: ${batchFile.name}`); }
                 }
             }, []);
 
@@ -488,16 +483,16 @@
                         update(next.id, {status:'uploading'});
                         if(next.file) {
                             // 内存中有文件直接用
-                            if(next.modelUrl) processTask(next.id, next.file, next.outputName, next.modelUrl);
-                            else update(next.id, {status:'error', statusText:'无模特'});
+                            if(next.fixedUrl) processTask(next.id, next.file, next.outputName, next.fixedUrl);
+                            else update(next.id, {status:'error', statusText:'无图1'});
                         } else {
                             // 内存无文件（刷新后），先从 IDB 捞
                             dbApi.getFile(next.id).then(blob => {
                                 if (blob) {
                                     const restoredFile = new File([blob], next.fileName, {type:blob.type});
                                     update(next.id, {file: restoredFile}); // 补回内存
-                                    if(next.modelUrl) processTask(next.id, restoredFile, next.outputName, next.modelUrl);
-                                    else update(next.id, {status:'error', statusText:'无模特'});
+                                    if(next.fixedUrl) processTask(next.id, restoredFile, next.outputName, next.fixedUrl);
+                                    else update(next.id, {status:'error', statusText:'无图1'});
                                 } else {
                                     update(next.id, {status:'error', statusText:'源文件丢失'});
                                 }
@@ -508,48 +503,46 @@
             }, [tasks, processTask]);
 
             const startBatch = async () => {
-                if(!subjects.length || !modelImage) return alert("请上传主体(图1)和模特(图2)");
+                if(!batchQueue.length || !fixedImage) return alert("请上传图2(序列)和图1(固定)");
                 if(!config.nanoApiKey) return setShowSettings(true);
                 
                 log("🚀 加入队列...");
-                let mUrl = "";
+                let fixedUrl = "";
                 try {
                     const c = new AbortController();
-                    log("☁️ 上传模特...");
-                    mUrl = await uploadQiniu(modelImage.file, config, c.signal);
-                } catch(e) { return log(`❌ 模特上传失败: ${e.message}`); }
+                    log("☁️ 上传图1(固定)...");
+                    fixedUrl = await uploadQiniu(fixedImage.file, config, c.signal);
+                } catch(e) { return log(`❌ 图1上传失败: ${e.message}`); }
                 
                 // 准备任务数据
                 const tasksToCreate = [];
-                for (const s of subjects) {
+                for (const s of batchQueue) {
                     const now = new Date();
                     const dateStr = now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
                     const rand = Math.random().toString(36).substring(2, 10).padEnd(8, '0'); 
                     const name = `${dateStr}_${rand}.png`;
                     const taskId = Math.random().toString(36).substr(2,9);
 
-                    // 1. 保存文件到 IndexedDB (关键)
                     try {
                         await dbApi.saveFile(taskId, s.file);
                     } catch(e) {
                         console.error("IDB Save Failed", e);
-                        log("⚠️ 缓存失败，刷新将丢失进度");
                     }
 
                     tasksToCreate.push({
                         id: taskId,
                         file: s.file, 
-                        fileName: s.file.name, // 保存文件名字符串用于恢复
+                        fileName: s.file.name, 
                         thumbnail: s.thumbnail,
                         outputName: outputDir ? `${outputDir}_${name}` : name,
                         status: 'queued', statusText: '排队', progress: 0,
                         resultUrl: null, timestamp: new Date().toLocaleTimeString(),
-                        modelUrl: mUrl
+                        fixedUrl: fixedUrl // Store fixed URL
                     });
                 }
 
                 setTasks(p => [...tasksToCreate, ...p]);
-                setSubjects([]);
+                setBatchQueue([]);
             };
 
             const toggleSel = id => setSelectedIds(p => { const n=new Set(p); n.has(id)?n.delete(id):n.add(id); return n; });
@@ -580,7 +573,6 @@
                                     <button onClick={()=>setShowSettings(false)}><Icons.X className="w-5 h-5"/></button>
                                 </div>
                                 
-                                {/* New: Quality Selector */}
                                 <div className="bg-slate-900 p-3 rounded border border-slate-700 flex flex-col gap-2">
                                      <div className="text-xs font-bold text-slate-300 flex items-center gap-2">
                                          <Icons.Box className="w-4 h-4 text-blue-400"/> 输出分辨率 (Image Size)
@@ -597,7 +589,6 @@
                                      </div>
                                 </div>
 
-                                {/* Auto Download Toggle */}
                                 <div className="bg-slate-900 p-3 rounded border border-slate-700 flex items-center justify-between">
                                     <span className="text-xs font-bold text-slate-300 flex items-center gap-2">
                                         <Icons.Download className="w-4 h-4 text-green-500"/> 任务完成后自动下载
@@ -645,7 +636,7 @@
                             <div className="bg-gradient-to-br from-yellow-400 to-orange-500 p-1.5 rounded text-black"><Icons.Zap className="w-5 h-5"/></div>
                             <div>
                                 <h1 className="text-lg font-bold text-white tracking-wide">NanoBanana <span className="text-yellow-400">Pro</span></h1>
-                                <p className="text-[10px] text-slate-500 font-mono tracking-widest">GALLERY BATCHER</p>
+                                <p className="text-[10px] text-slate-500 font-mono tracking-widest">GALLERY BATCHER (LOGIC V2)</p>
                             </div>
                         </div>
                         <div className="flex gap-3">
@@ -663,49 +654,49 @@
                         {/* Sidebar */}
                         <div className="w-80 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 z-10 shadow-xl">
                             <div className="p-4 flex-1 overflow-y-auto custom-scrollbar space-y-4">
-                                {/* 1. Subject Queue (Moved Top) */}
+                                {/* 1. Batch Queue (Image 2) */}
                                 <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
                                     <div className="flex justify-between items-center mb-3">
                                         <h2 className="text-xs font-bold text-purple-400 flex items-center gap-2">
-                                            <span className="w-5 h-5 rounded bg-purple-500 text-black flex items-center justify-center text-xs">1</span> 
-                                            主体队列 (图1)
+                                            <span className="w-5 h-5 rounded bg-purple-500 text-black flex items-center justify-center text-xs">2</span> 
+                                            图2序列 (风格/参考)
                                         </h2>
-                                        <span className="text-[10px] bg-slate-700 px-2 py-0.5 rounded">{subjects.length}</span>
+                                        <span className="text-[10px] bg-slate-700 px-2 py-0.5 rounded">{batchQueue.length}</span>
                                     </div>
                                     <div 
                                         className="h-32 overflow-y-auto pr-1 custom-scrollbar bg-slate-900/50 rounded-lg p-2 border-2 border-dashed border-slate-700 hover:border-purple-500/50 transition-colors grid grid-cols-3 gap-2"
                                         onDragOver={e=>{e.preventDefault();e.stopPropagation()}} 
-                                        onDrop={e=>{e.preventDefault();e.stopPropagation();(async()=>{const f=Array.from(e.dataTransfer.files);if(f.length){const n=await Promise.all(f.map(async x=>({id:Math.random().toString(36).slice(2),file:x,thumbnail:await createThumbnail(x)})));setSubjects(p=>[...p,...n])}})()}}
+                                        onDrop={e=>{e.preventDefault();e.stopPropagation();(async()=>{const f=Array.from(e.dataTransfer.files);if(f.length){const n=await Promise.all(f.map(async x=>({id:Math.random().toString(36).slice(2),file:x,thumbnail:await createThumbnail(x)})));setBatchQueue(p=>[...p,...n])}})()}}
                                         onClick={()=>fileInputRef.current?.click()}
                                     >
-                                        <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*" onChange={async e=>{const f=Array.from(e.target.files);const n=await Promise.all(f.map(async x=>({id:Math.random().toString(36).slice(2),file:x,thumbnail:await createThumbnail(x)})));setSubjects(p=>[...p,...n])}} />
-                                        {subjects.length===0 && <div className="col-span-3 flex flex-col items-center justify-center text-slate-600 h-full"><Icons.Plus className="w-6 h-6 mb-1 opacity-50"/><span className="text-[10px]">点击/拖入图片</span></div>}
-                                        {subjects.map(s=>(
+                                        <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*" onChange={async e=>{const f=Array.from(e.target.files);const n=await Promise.all(f.map(async x=>({id:Math.random().toString(36).slice(2),file:x,thumbnail:await createThumbnail(x)})));setBatchQueue(p=>[...p,...n])}} />
+                                        {batchQueue.length===0 && <div className="col-span-3 flex flex-col items-center justify-center text-slate-600 h-full"><Icons.Plus className="w-6 h-6 mb-1 opacity-50"/><span className="text-[10px]">点击/拖入参考图(2)</span></div>}
+                                        {batchQueue.map(s=>(
                                             <div key={s.id} className="relative aspect-square rounded overflow-hidden group border border-slate-700">
                                                 <img src={s.thumbnail} className="w-full h-full object-cover"/>
-                                                <button onClick={e=>{e.stopPropagation();setSubjects(p=>p.filter(x=>x.id!==s.id))}} className="absolute top-0 right-0 bg-red-500 text-white p-0.5 opacity-0 group-hover:opacity-100"><Icons.X className="w-3 h-3"/></button>
+                                                <button onClick={e=>{e.stopPropagation();setBatchQueue(p=>p.filter(x=>x.id!==s.id))}} className="absolute top-0 right-0 bg-red-500 text-white p-0.5 opacity-0 group-hover:opacity-100"><Icons.X className="w-3 h-3"/></button>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
 
-                                {/* 2. Model (Moved Down) */}
+                                {/* 2. Fixed Image (Image 1) */}
                                 <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
                                     <h2 className="text-xs font-bold text-blue-400 mb-3 flex items-center gap-2">
-                                        <span className="w-5 h-5 rounded bg-blue-500 text-black flex items-center justify-center text-xs">2</span> 
-                                        参考模特 (图2)
+                                        <span className="w-5 h-5 rounded bg-blue-500 text-black flex items-center justify-center text-xs">1</span> 
+                                        图1固定 (主体/模特)
                                     </h2>
                                     <div 
                                         className="relative h-32 border-2 border-dashed border-slate-700 rounded-lg hover:border-blue-500 hover:bg-slate-700/50 transition-colors cursor-pointer overflow-hidden flex flex-col items-center justify-center group"
-                                        onClick={()=>modelInputRef.current?.click()}
+                                        onClick={()=>fixedInputRef.current?.click()}
                                         onDragOver={e=>{e.preventDefault();e.stopPropagation()}} 
-                                        onDrop={e=>{e.preventDefault();e.stopPropagation();const f=e.dataTransfer.files[0];if(f){(async()=>{const t=await createThumbnail(f);setModelImage({file:f,thumbnail:t})})()}}}
+                                        onDrop={e=>{e.preventDefault();e.stopPropagation();const f=e.dataTransfer.files[0];if(f){(async()=>{const t=await createThumbnail(f);setFixedImage({file:f,thumbnail:t})})()}}}
                                     >
-                                        <input type="file" ref={modelInputRef} className="hidden" accept="image/*" onChange={async e=>{const f=e.target.files[0];if(f){const t=await createThumbnail(f);setModelImage({file:f,thumbnail:t})}}} />
-                                        {modelImage ? (
-                                            <img src={modelImage.thumbnail} className="absolute inset-0 w-full h-full object-contain bg-black/40 p-2" />
+                                        <input type="file" ref={fixedInputRef} className="hidden" accept="image/*" onChange={async e=>{const f=e.target.files[0];if(f){const t=await createThumbnail(f);setFixedImage({file:f,thumbnail:t})}}} />
+                                        {fixedImage ? (
+                                            <img src={fixedImage.thumbnail} className="absolute inset-0 w-full h-full object-contain bg-black/40 p-2" />
                                         ) : (
-                                            <div className="text-center text-slate-500 group-hover:text-blue-400"><Icons.Upload className="w-6 h-6 mx-auto mb-1 opacity-50"/><span className="text-[10px]">点击换图2</span></div>
+                                            <div className="text-center text-slate-500 group-hover:text-blue-400"><Icons.Upload className="w-6 h-6 mx-auto mb-1 opacity-50"/><span className="text-[10px]">点击换图1</span></div>
                                         )}
                                     </div>
                                     
@@ -714,13 +705,13 @@
                                         <input 
                                             type="text" 
                                             className="flex-1 bg-slate-900 border border-slate-700 rounded p-1.5 text-[10px] text-slate-300 focus:border-blue-500 outline-none"
-                                            placeholder="粘贴本地模特库路径 (备注)"
+                                            placeholder="粘贴本地图1路径 (备注)"
                                             value={config.localModelPath || ''}
                                             onChange={e=>setConfig({...config, localModelPath:e.target.value})}
                                         />
                                         <button 
                                             className="bg-slate-700 hover:bg-slate-600 text-slate-300 p-1.5 rounded border border-slate-600 transition-colors"
-                                            onClick={()=>modelInputRef.current?.click()}
+                                            onClick={()=>fixedInputRef.current?.click()}
                                             title="打开文件选择器"
                                         >
                                             <Icons.Folder className="w-4 h-4"/>
@@ -728,7 +719,7 @@
                                     </div>
                                 </div>
 
-                                {/* 3. Prompt Config (New) */}
+                                {/* 3. Prompt Config */}
                                 <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
                                     <h2 className="text-xs font-bold text-yellow-500 mb-2 flex items-center gap-2">
                                         <Icons.Edit className="w-4 h-4"/> 提示词配置 (图1换图2)
@@ -768,7 +759,7 @@
                                         <Icons.Layers className="w-6 h-6 text-blue-500"/> 任务画廊
                                         <span className="text-sm font-normal text-slate-500 ml-2 bg-slate-900 px-2 py-0.5 rounded-full border border-slate-800">{tasks.length} 任务</span>
                                     </h2>
-                                    {/* New: Selection Controls */}
+                                    {/* Selection Controls */}
                                     <div className="flex items-center gap-2 bg-slate-800 px-2 py-1 rounded border border-slate-700">
                                         <input 
                                             type="checkbox" 
